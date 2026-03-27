@@ -1,8 +1,9 @@
 """
-app.py — PawPal+ Streamlit UI
--------------------------------
-Clean, native-component-first design.
-Wires all Scheduler methods to the UI.
+app.py — PawPal+  ·  Snowchat-inspired dark UI
+------------------------------------------------
+Dark theme driven by .streamlit/config.toml
+All Scheduler methods wired: generate_plan, sort_by_time,
+filter_tasks, refresh_recurring_tasks, detect_conflicts
 """
 
 import streamlit as st
@@ -18,40 +19,53 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
-# ── Minimal CSS: only fix what Streamlit can't do natively ──────────────────
+# ── Minimal CSS: brand title + a few fine-tune tweaks ───────────────────────
 st.markdown("""
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
 html, body, [class*="css"] { font-family: 'Inter', sans-serif; }
 
-/* Tighten the top padding */
-.block-container { padding-top: 1.8rem; padding-bottom: 2rem; }
+/* Tighten main padding */
+.block-container { padding-top: 1.4rem; padding-bottom: 2rem; max-width: 960px; }
 
-/* Primary button color — coral/teal warmth */
-.stButton > button {
-    background-color: #0D9488;
-    color: white;
-    border: none;
-    border-radius: 8px;
-    font-weight: 600;
-    transition: background-color .2s;
+/* Brand title */
+.brand-title {
+    font-size: 3.8rem;
+    font-weight: 800;
+    color: #FF4B6E;
+    letter-spacing: -2px;
+    line-height: 1;
+    text-align: center;
 }
-.stButton > button:hover { background-color: #0F766E; }
+.brand-sub {
+    text-align: center;
+    color: #8B8FA8;
+    font-size: 1rem;
+    margin-top: 6px;
+    margin-bottom: 2rem;
+}
 
-/* Active tab underline */
+/* Sidebar brand */
+.sidebar-brand {
+    font-size: 1.6rem;
+    font-weight: 800;
+    color: #FF4B6E;
+    margin-bottom: 0.2rem;
+}
+
+/* Tab underline fix */
 .stTabs [aria-selected="true"] {
-    color: #0D9488 !important;
-    border-bottom-color: #0D9488 !important;
-    font-weight: 600;
+    color: #FF4B6E !important;
+    border-bottom-color: #FF4B6E !important;
+    font-weight: 700;
 }
+.stTabs [data-baseweb="tab"] { font-size: 0.9rem; font-weight: 500; }
 
-/* Sidebar top border accent */
-section[data-testid="stSidebar"] {
-    border-right: 3px solid #0D9488;
-}
+/* Metric values */
+[data-testid="stMetricValue"] { font-size: 1.6rem !important; font-weight: 700 !important; }
 
-/* Make st.metric numbers teal */
-[data-testid="stMetricValue"] { color: #0D9488 !important; font-weight: 700 !important; }
+/* Hide the hamburger and footer */
+#MainMenu, footer { visibility: hidden; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -67,14 +81,14 @@ PLABEL = {1: "🔴 High", 2: "🟡 Medium", 3: "🟢 Low"}
 # SIDEBAR
 # ══════════════════════════════════════════════════════════════════════════════
 with st.sidebar:
-    st.image("https://em-content.zobj.net/source/apple/391/paw-prints_1f43e.png", width=52)
-    st.title("PawPal+")
-    st.caption("Smart pet care scheduling")
+    st.markdown('<div class="sidebar-brand">🐾 PawPal+</div>', unsafe_allow_html=True)
+    st.caption("Intelligent pet care scheduling")
     st.divider()
 
-    st.subheader("👤 Your Profile")
+    # ── Profile form ──
+    st.markdown("**👤 Owner & Pet Profile**")
     with st.form("profile_form"):
-        owner_name     = st.text_input("Your name", value="Jordan")
+        owner_name     = st.text_input("Your name", value="Jordan", placeholder="Your name")
         available_time = st.number_input("Free time today (min)", 5, 480, 90)
         pet_name       = st.text_input("Pet name", value="Fido")
         species        = st.text_input("Breed / species", value="Labrador")
@@ -84,12 +98,13 @@ with st.sidebar:
         pet = Pet(name=pet_name, species_breed=species or None)
         o   = Owner(name=owner_name, available_time=int(available_time))
         o.add_pet(pet)
-        st.session_state.owner    = o
-        st.session_state.plan     = []
-        st.session_state.warnings = []
+        st.session_state.owner     = o
+        st.session_state.plan      = []
+        st.session_state.warnings  = []
         st.session_state.reasoning = ""
         st.success(f"Hi {owner_name}! Profile saved 🎉")
 
+    # ── Stats + Features ──
     if st.session_state.owner:
         owner     = st.session_state.owner
         all_tasks = owner.get_all_tasks()
@@ -97,40 +112,51 @@ with st.sidebar:
         needed    = sum(t.duration for t in all_tasks if not t.is_completed)
 
         st.divider()
-        st.subheader("📊 Overview")
+        st.markdown("**📊 Overview**")
         c1, c2 = st.columns(2)
-        c1.metric("Tasks", len(all_tasks))
-        c2.metric("Done", done)
-        c1.metric("Time needed", f"{needed}m")
-        c2.metric("Available", f"{owner.available_time}m")
+        c1.metric("Tasks",     len(all_tasks))
+        c2.metric("Complete",  done)
+        c1.metric("Needed",    f"{needed} min")
+        c2.metric("Available", f"{owner.available_time} min")
 
+    st.divider()
+    st.markdown("**✨ Features**")
+    st.markdown("""
+- 🔴 **Priority Scheduling** — High urgency tasks go first
+- ⏱ **Time-aware** — Only fits what you have time for
+- 🔄 **Recurring Tasks** — Auto-generates next occurrences
+- 🔍 **Filter & Sort** — Find tasks by pet or status
+- ⚠️ **Conflict Detection** — Flags overlapping tasks
+- 🧠 **Reasoning** — Explains every scheduling decision
+""")
 
 # ══════════════════════════════════════════════════════════════════════════════
-# GUARD
+# MAIN — Brand header always visible
 # ══════════════════════════════════════════════════════════════════════════════
+st.markdown('<div class="brand-title">pawpal+</div>', unsafe_allow_html=True)
+st.markdown('<div class="brand-sub">Your smart pet care planning assistant</div>', unsafe_allow_html=True)
+
 if st.session_state.owner is None:
-    st.title("🐾 Welcome to PawPal+")
-    st.info("Fill in your **Owner & Pet Profile** in the sidebar to get started.")
+    st.info("👈  Set up your **Owner & Pet Profile** in the sidebar to get started.")
     st.stop()
 
 owner = st.session_state.owner
 
 # ══════════════════════════════════════════════════════════════════════════════
-# MAIN TABS
+# TABS
 # ══════════════════════════════════════════════════════════════════════════════
 tab_add, tab_manage, tab_sched = st.tabs([
-    "  ➕ Add Task  ",
-    "  📋 Manage Tasks  ",
-    "  🗓️ Schedule  ",
+    "  ➕  Add Task  ",
+    "  📋  Manage Tasks  ",
+    "  🗓️  Schedule  ",
 ])
-
 
 # ─────────────────────────────────────────────────────────────────────────────
 # TAB 1 — Add Task
 # ─────────────────────────────────────────────────────────────────────────────
 with tab_add:
-    st.header("Add a Care Task")
-    st.caption("Create tasks for your pet. Set a priority, duration, and optionally a recurrence.")
+    st.subheader("Add a Care Task")
+    st.caption("Create a new task and assign it to your pet.")
 
     with st.form("task_form", clear_on_submit=True):
         col1, col2, col3 = st.columns([3, 1.5, 1.5])
@@ -139,11 +165,11 @@ with tab_add:
         priority_str = col3.selectbox("Priority", ["High", "Medium", "Low"])
 
         col4, col5, col6 = st.columns(3)
-        target_pet   = col4.selectbox("Assign to", [p.name for p in owner.pets])
-        recurrence   = col5.selectbox("Repeats", ["Never", "daily", "weekly"])
-        due_date     = col6.date_input("Due date", value=date.today())
+        target_pet = col4.selectbox("Assign to", [p.name for p in owner.pets])
+        recurrence = col5.selectbox("Repeats", ["Never", "daily", "weekly"])
+        due_date   = col6.date_input("Due date", value=date.today())
 
-        submitted = st.form_submit_button("➕ Add Task", use_container_width=True)
+        submitted = st.form_submit_button("➕  Add Task", use_container_width=True)
 
     if submitted:
         if not task_name.strip():
@@ -160,7 +186,7 @@ with tab_add:
             for p in owner.pets:
                 if p.name == target_pet:
                     p.add_task(t)
-            recur_note = f" · repeats {recurrence}" if recurrence != "Never" else ""
+            recur_note = f" · repeats **{recurrence}**" if recurrence != "Never" else ""
             st.success(f"✅ **{t.name}** added for **{target_pet}** — {duration} min · {priority_str}{recur_note}")
             st.rerun()
 
@@ -171,17 +197,15 @@ with tab_add:
 with tab_manage:
     all_tasks = owner.get_all_tasks()
     if not all_tasks:
-        st.info("No tasks yet. Head to **Add Task** to create your first one.")
+        st.info("No tasks yet — add some in the **Add Task** tab.")
     else:
         scheduler = Scheduler(owner)
 
-        st.header("View & Manage Tasks")
-
-        # Filter / sort bar
+        st.subheader("Filter & Sort")
         f1, f2, f3 = st.columns(3)
-        fp  = f1.selectbox("Filter by pet",    ["All"] + [p.name for p in owner.pets])
-        fs  = f2.selectbox("Filter by status", ["All", "Pending", "Completed"])
-        srt = f3.selectbox("Sort by",          ["Priority → Duration", "Duration (shortest first)"])
+        fp  = f1.selectbox("Pet",    ["All"] + [p.name for p in owner.pets])
+        fs  = f2.selectbox("Status", ["All", "Pending", "Completed"])
+        srt = f3.selectbox("Sort",   ["Priority → Duration", "Duration (shortest first)"])
 
         filtered = scheduler.filter_tasks(
             pet_name  = None if fp == "All" else fp,
@@ -199,32 +223,29 @@ with tab_manage:
             st.info("No tasks match your filters.")
         else:
             for i, task in enumerate(tasks_to_show):
-                status_icon = "✅" if task.is_completed else "⏳"
-                recur_tag   = f"  `↺ {task.recurrence}`" if task.recurrence else ""
-                due_tag     = f"  · due **{task.due_date}**" if task.due_date else ""
-                priority_lbl = PLABEL.get(task.priority, "")
+                icon = "✅" if task.is_completed else "⏳"
+                recur = f"  •  ↺ `{task.recurrence}`" if task.recurrence else ""
+                due   = f"  •  due {task.due_date}" if task.due_date else ""
 
-                with st.container():
-                    tc1, tc2, tc3, tc4, tc5 = st.columns([.15, 2.5, 1, 1, 1])
-                    tc1.markdown(f"### {status_icon}")
-                    tc2.markdown(
-                        f"**{task.name}** &nbsp; {priority_lbl}{recur_tag}\n\n"
-                        f"<sub>{task.pet_name} · {task.duration} min{due_tag}</sub>",
-                        unsafe_allow_html=True,
-                    )
-                    if tc3.button("✓ Done" if not task.is_completed else "↩ Undo", key=f"chk_{i}"):
-                        task.mark_complete()
-                        st.rerun()
-                    if tc4.button("🗑 Delete", key=f"del_{i}"):
-                        for p in owner.pets:
-                            if task in p.tasks:
-                                p.tasks.remove(task)
-                        st.rerun()
+                tc1, tc2, tc3, tc4 = st.columns([0.3, 4, 1.1, 1.1])
+                tc1.markdown(f"## {icon}")
+                tc2.markdown(
+                    f"**{task.name}**  &nbsp; {PLABEL.get(task.priority, '')}{recur}\n\n"
+                    f"<sub style='color:#8B8FA8'>{task.pet_name}  •  {task.duration} min{due}</sub>",
+                    unsafe_allow_html=True,
+                )
+                if tc3.button("✓ Done" if not task.is_completed else "↩ Undo", key=f"chk_{i}"):
+                    task.mark_complete()
+                    st.rerun()
+                if tc4.button("🗑 Delete", key=f"del_{i}"):
+                    for p in owner.pets:
+                        if task in p.tasks:
+                            p.tasks.remove(task)
+                    st.rerun()
                 st.divider()
 
         # ── Sorted table ──────────────────────────────────────────────────────
-        st.subheader("📊 Sorted Task Table")
-        st.caption("Tasks sorted by duration (shortest first) via Scheduler.sort_by_time()")
+        st.subheader("📊 Task Table  ·  sorted by duration")
         rows = [{
             "Task":       t.name,
             "Pet":        t.pet_name,
@@ -241,12 +262,12 @@ with tab_manage:
         st.subheader("🔄 Recurring Task Refresh")
         done_recurring = [t for t in all_tasks if t.is_completed and t.recurrence]
         if done_recurring:
-            st.caption(f"{len(done_recurring)} completed recurring task(s) ready for refresh.")
-            if st.button("🔄 Generate next occurrences", use_container_width=True):
+            st.caption(f"{len(done_recurring)} completed recurring task(s) ready to roll over.")
+            if st.button("🔄  Generate next occurrences", use_container_width=True):
                 new = scheduler.refresh_recurring_tasks()
                 if new:
                     for nt in new:
-                        st.success(f"✅ **{nt.name}** → {nt.pet_name} · due {nt.due_date}")
+                        st.success(f"✅ **{nt.name}** → {nt.pet_name}  ·  due {nt.due_date}")
                     st.rerun()
                 else:
                     st.info("Nothing new to generate.")
@@ -263,14 +284,14 @@ with tab_sched:
     if not owner.get_all_tasks():
         st.info("Add tasks first in the **Add Task** tab.")
         st.stop()
-    elif not pending:
-        st.success("🎉 All tasks complete for today! Add more or refresh recurring ones.")
+    if not pending:
+        st.success("🎉 All tasks complete! Add more or refresh recurring ones.")
         st.stop()
 
-    st.header("Today's Schedule")
-    st.caption("The scheduler picks the highest-priority tasks that fit within your available time.")
+    st.subheader("Generate Today's Plan")
+    st.caption("The scheduler picks highest-priority tasks that fit within your available time.")
 
-    if st.button("🚀 Generate Optimal Schedule", use_container_width=True):
+    if st.button("🚀  Generate Optimal Schedule", use_container_width=True):
         sched = Scheduler(owner)
         st.session_state.plan      = sched.generate_plan()
         st.session_state.warnings  = sched.detect_conflicts()
@@ -281,58 +302,57 @@ with tab_sched:
     reasoning = st.session_state.reasoning
 
     if plan:
-        # Summary metrics
         total   = sum(t.duration for t in plan)
         left    = owner.available_time - total
         skipped = len(pending) - len(plan)
 
+        # Metrics row
         m1, m2, m3, m4 = st.columns(4)
-        m1.metric("Tasks Scheduled", len(plan))
-        m2.metric("Total Time",      f"{total} min")
-        m3.metric("Time Remaining",  f"{left} min")
-        m4.metric("Skipped",         skipped, delta=f"-{skipped}" if skipped else None,
-                  delta_color="inverse" if skipped else "off")
+        m1.metric("Scheduled",      len(plan))
+        m2.metric("Total Time",     f"{total} min")
+        m3.metric("Time Left",      f"{left} min")
+        m4.metric("Skipped",        skipped)
 
         st.divider()
 
         # Conflict warnings
         if warnings:
-            st.subheader("⚠️ Conflict Warnings")
+            st.subheader("⚠️  Conflicts Detected")
             for w in warnings:
                 st.warning(w)
         else:
-            st.success("✅ No scheduling conflicts — your plan is clean!")
+            st.success("✅  No conflicts — your schedule is clean!")
 
         st.divider()
 
         # Plan steps
-        st.subheader("📋 Your Plan")
+        st.subheader("📋  Today's Plan")
         cursor = 0
         for i, task in enumerate(plan, 1):
-            s = f"{cursor // 60:02d}:{cursor % 60:02d}"
-            e_min = cursor + task.duration
-            e = f"{e_min // 60:02d}:{e_min % 60:02d}"
-            recur = f"  ·  ↺ {task.recurrence}" if task.recurrence else ""
+            s   = f"{cursor // 60:02d}:{cursor % 60:02d}"
+            end = cursor + task.duration
+            e   = f"{end // 60:02d}:{end % 60:02d}"
+            recur = f"  ·  ↺ `{task.recurrence}`" if task.recurrence else ""
 
-            pc1, pc2, pc3 = st.columns([.5, 4, 1])
-            pc1.markdown(f"### {i}")
+            pc1, pc2, pc3 = st.columns([0.4, 5, 1])
+            pc1.markdown(f"### {i}.")
             pc2.markdown(
-                f"**{task.name}** &nbsp; {PLABEL.get(task.priority, '')}{recur}\n\n"
-                f"<sub>{task.pet_name} &nbsp; · &nbsp; {s} → {e}</sub>",
+                f"**{task.name}**  &nbsp; {PLABEL.get(task.priority, '')}{recur}\n\n"
+                f"<sub style='color:#8B8FA8'>{task.pet_name}  •  {s} → {e}</sub>",
                 unsafe_allow_html=True,
             )
             pc3.markdown(f"**{task.duration} min**")
             st.divider()
             cursor += task.duration
 
-        # Progress bar
+        # Time bar
         pct = min(total / owner.available_time, 1.0) if owner.available_time else 0
-        st.subheader("⏱ Time Utilisation")
-        st.progress(pct, text=f"{total} of {owner.available_time} min used ({pct*100:.0f}%)")
+        st.subheader("⏱  Time Used")
+        st.progress(pct, text=f"{total} of {owner.available_time} min  ({pct*100:.0f}%)")
 
         # Reasoning
         st.divider()
-        with st.expander("🧠 Scheduler Reasoning"):
+        with st.expander("🧠  Scheduler Reasoning — why each task was chosen or skipped"):
             for line in reasoning.split("\n"):
                 if not line.strip():
                     continue
@@ -344,4 +364,4 @@ with tab_sched:
                     st.info(line)
 
     elif reasoning:
-        st.warning("⚠️ No tasks fit within your available time. Try increasing your free minutes or shortening task durations.")
+        st.warning("No tasks fit within your available time. Try increasing your free minutes or shortening task durations.")

@@ -2,6 +2,12 @@
 
 ## 1. System Design
 
+**Core Actions**
+Based on the application requirements, a user should be able to perform these three core actions:
+1. **Profile Management**: Add and manage basic information about the owner and their pet(s).
+2. **Task Scheduling**: Add, edit, or remove specific pet care tasks (e.g., schedule a walk, feeding, meds), specifying their duration and priority.
+3. **Daily Plan Generation**: Generate an optimized daily schedule based on available time and priorities, and view today's tasks with explanations.
+
 **a. Initial design**
 
 - Briefly describe your initial UML design.

@@ -7,6 +7,7 @@ Classes: CareTask, Pet, Owner, Scheduler
 
 from dataclasses import dataclass, field
 from typing import Optional
+from datetime import date, timedelta
 
 
 # ---------------------------------------------------------------------------
@@ -20,6 +21,8 @@ class CareTask:
     duration: int           # in minutes
     priority: int           # 1 = High, 2 = Medium, 3 = Low
     is_completed: bool = False
+    recurrence: Optional[str] = None    # "daily", "weekly", or None
+    due_date: Optional[date] = None     # date this task is due
 
     def mark_complete(self) -> None:
         """Toggle the task as completed for today."""
@@ -31,10 +34,40 @@ class CareTask:
             raise ValueError("Priority must be 1 (High), 2 (Medium), or 3 (Low).")
         self.priority = new_priority
 
+    def next_occurrence(self) -> Optional["CareTask"]:
+        """
+        If this task is recurring and completed, return a new CareTask
+        for the next occurrence. Returns None if not recurring.
+        """
+        if not self.is_completed or self.recurrence is None:
+            return None
+
+        if self.recurrence == "daily":
+            next_due = (self.due_date or date.today()) + timedelta(days=1)
+        elif self.recurrence == "weekly":
+            next_due = (self.due_date or date.today()) + timedelta(weeks=1)
+        else:
+            return None
+
+        return CareTask(
+            name=self.name,
+            pet_name=self.pet_name,
+            duration=self.duration,
+            priority=self.priority,
+            is_completed=False,
+            recurrence=self.recurrence,
+            due_date=next_due,
+        )
+
     def __str__(self) -> str:
         status = "✓" if self.is_completed else "○"
         priority_label = {1: "High", 2: "Medium", 3: "Low"}.get(self.priority, "?")
-        return f"[{status}] {self.name} ({self.pet_name}) — {self.duration} min | Priority: {priority_label}"
+        recur = f" [{self.recurrence}]" if self.recurrence else ""
+        due = f" due {self.due_date}" if self.due_date else ""
+        return (
+            f"[{status}] {self.name} ({self.pet_name}) — "
+            f"{self.duration} min | {priority_label}{recur}{due}"
+        )
 
 
 # ---------------------------------------------------------------------------
@@ -49,7 +82,7 @@ class Pet:
 
     def add_task(self, task: CareTask) -> None:
         """Add a new CareTask to this pet's task list."""
-        task.pet_name = self.name   # Ensure the task knows which pet it belongs to
+        task.pet_name = self.name
         self.tasks.append(task)
 
     def get_all_tasks(self) -> list[CareTask]:
@@ -102,11 +135,13 @@ class Scheduler:
         self.daily_plan: list[CareTask] = []
         self.reasoning: str = ""
 
+    # ── Core plan generation ────────────────────────────────────────────────
+
     def generate_plan(self) -> list[CareTask]:
         """Generate a prioritized daily care plan based on the owner's time and tasks."""
         all_tasks = self.owner.get_all_tasks()
 
-        # Sort by priority (1=High first), then by duration (shorter tasks first as tiebreaker)
+        # Sort by priority (1=High first), then by duration (shorter tasks first)
         sorted_tasks = sorted(all_tasks, key=lambda t: (t.priority, t.duration))
 
         time_remaining = self.owner.available_time
@@ -143,6 +178,87 @@ class Scheduler:
             return "No plan has been generated yet. Call generate_plan() first."
         return self.reasoning
 
+    # ── Step 2: Sorting ─────────────────────────────────────────────────────
+
+    def sort_by_time(self, tasks: Optional[list[CareTask]] = None) -> list[CareTask]:
+        """Sort tasks by duration (shortest first); defaults to all owner tasks."""
+        source = tasks if tasks is not None else self.owner.get_all_tasks()
+        return sorted(source, key=lambda t: t.duration)
+
+    # ── Step 2: Filtering ───────────────────────────────────────────────────
+
+    def filter_tasks(
+        self,
+        pet_name: Optional[str] = None,
+        completed: Optional[bool] = None,
+    ) -> list[CareTask]:
+        """
+        Filter owner tasks by pet name and/or completion status.
+        Pass pet_name='Fido' to get only Fido's tasks.
+        Pass completed=False to get only pending tasks.
+        """
+        tasks = self.owner.get_all_tasks()
+
+        if pet_name is not None:
+            tasks = [t for t in tasks if t.pet_name == pet_name]
+
+        if completed is not None:
+            tasks = [t for t in tasks if t.is_completed == completed]
+
+        return tasks
+
+    # ── Step 3: Recurring task refresh ─────────────────────────────────────
+
+    def refresh_recurring_tasks(self) -> list[CareTask]:
+        """
+        After completing tasks, generate next-occurrence instances for
+        any recurring tasks that were just marked done.
+        Adds new tasks back to the appropriate pet and returns them.
+        """
+        new_tasks: list[CareTask] = []
+
+        for pet in self.owner.pets:
+            for task in list(pet.tasks):
+                next_task = task.next_occurrence()
+                if next_task:
+                    pet.add_task(next_task)
+                    new_tasks.append(next_task)
+
+        return new_tasks
+
+    # ── Step 4: Conflict detection ──────────────────────────────────────────
+
+    def detect_conflicts(self) -> list[str]:
+        """
+        Detect scheduling conflicts in the daily plan.
+        Uses a running time window: if a new task starts before the previous one
+        ends, it is flagged as a conflict. Returns a list of warning strings.
+        """
+        if not self.daily_plan:
+            return []
+
+        warnings: list[str] = []
+        current_time = 0          # minutes from start of day
+        schedule: list[tuple[int, int, CareTask]] = []  # (start, end, task)
+
+        for task in self.daily_plan:
+            start = current_time
+            end   = current_time + task.duration
+
+            # Check overlap with every already-placed task
+            for s_start, s_end, s_task in schedule:
+                if start < s_end and end > s_start:          # overlap condition
+                    warnings.append(
+                        f"⚠️  CONFLICT: '{task.name}' ({task.pet_name}) "
+                        f"overlaps with '{s_task.name}' ({s_task.pet_name}) "
+                        f"[{s_start}–{s_end} min vs {start}–{end} min]"
+                    )
+
+            schedule.append((start, end, task))
+            current_time = end      # tasks run back-to-back by default
+
+        return warnings
+
     def __str__(self) -> str:
         task_count = len(self.daily_plan)
         total_time = sum(t.duration for t in self.daily_plan)
@@ -150,6 +266,7 @@ class Scheduler:
             f"Today's plan for {self.owner.name}: "
             f"{task_count} task(s) scheduled, {total_time} min total."
         )
+
 
 if __name__ == "__main__":
     owner = Owner("Alex", available_time=60)

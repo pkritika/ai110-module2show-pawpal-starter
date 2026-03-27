@@ -133,8 +133,16 @@ with st.sidebar:
 # ══════════════════════════════════════════════════════════════════════════════
 # MAIN — Brand header always visible
 # ══════════════════════════════════════════════════════════════════════════════
-st.markdown('<div class="brand-title">pawpal+</div>', unsafe_allow_html=True)
-st.markdown('<div class="brand-sub">Your smart pet care planning assistant</div>', unsafe_allow_html=True)
+st.markdown(
+    '<h1 style="font-size:3.6rem;font-weight:800;color:#FF4B6E;letter-spacing:-2px;'
+    'text-align:center;line-height:1;margin-bottom:4px;">pawpal+</h1>',
+    unsafe_allow_html=True,
+)
+st.markdown(
+    '<p style="text-align:center;color:#8B8FA8;font-size:1rem;margin-top:0;margin-bottom:1.5rem;">'
+    'Your smart pet care planning assistant</p>',
+    unsafe_allow_html=True,
+)
 
 if st.session_state.owner is None:
     st.info("👈  Set up your **Owner & Pet Profile** in the sidebar to get started.")

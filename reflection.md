@@ -10,13 +10,17 @@ Based on the application requirements, a user should be able to perform these th
 
 **a. Initial design**
 
-- Briefly describe your initial UML design.
-- What classes did you include, and what responsibilities did you assign to each?
+My initial design included four core classes that map to the primary use cases of the app:
+- **`Owner`**: Holds the user's details, such as their name, available time, and a list of `Pet` objects they own. Its responsibility is to represent the constraints (time) that the scheduler will use.
+- **`Pet`**: Represents the animal receiving care. It holds basic info (name, species) and maintains a list of `CareTask` objects specific to that pet.
+- **`CareTask`**: A data holder representing a specific activity (like walking or feeding). It tracks the task's name, expected duration, urgency/priority, and whether it has been completed.
+- **`Scheduler`**: The core logic engine. It takes an `Owner` context, evaluates the owner's available time against the tasks of their pets, and generates a constrained, prioritized `daily_plan` (a list of tasks) along with a natural language `reasoning` trace.
 
 **b. Design changes**
 
-- Did your design change during implementation?
-- If yes, describe at least one change and why you made it.
+During a review of the initial class skeletons, a potential logical bottleneck was identified: once tasks from multiple pets are flattened into a single `daily_plan` list by the `Scheduler`, the UI would not know which task belonged to which pet (e.g., "Walk" could be for the dog or the cat).
+
+To resolve this bottleneck, I modified the `CareTask` model by adding a `pet_name: str` attribute. This reverse reference ensures that when tasks are collected into the master schedule, the application retains the context of which pet the task belongs to, allowing the UI to display it clearly (e.g., "Walk - Fido").
 
 ---
 
@@ -24,13 +28,19 @@ Based on the application requirements, a user should be able to perform these th
 
 **a. Constraints and priorities**
 
-- What constraints does your scheduler consider (for example: time, priority, preferences)?
-- How did you decide which constraints mattered most?
+My scheduler primarily considers two constraints:
+1. **Priority**: High (1), Medium (2), Low (3).
+2. **Time**: The owner's `available_time` for the day versus the task's `duration`.
+
+Priority matters most because skipping a critical medication (High) is far worse than skipping a grooming session (Low). Time is the hard limiting factor.
 
 **b. Tradeoffs**
 
-- Describe one tradeoff your scheduler makes.
-- Why is that tradeoff reasonable for this scenario?
+One major tradeoff my scheduler makes is using a **Greedy Algorithm** instead of a complex optimization algorithm (like the Knapsack DP algorithm). It sorts by priority and tries to pack them into the time budget one by one. 
+
+The tradeoff is that it might not find the mathematically perfect combination of tasks to use exactly 100% of the available time. For example, it might schedule a 50-minute High priority task, leaving 10 minutes, and skip a 15-minute Medium task, when perhaps scheduling the 15-minute task plus a 40-minute task would have fit perfectly. 
+
+This tradeoff is highly reasonable for this scenario because pet care isn't about perfectly packing minutes—it's about making sure the most urgent things happen. The greedy approach guarantees the highest priority tasks get picked first, and keeps the code incredibly readable and fast.
 
 ---
 

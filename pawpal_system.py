@@ -35,10 +35,7 @@ class CareTask:
         self.priority = new_priority
 
     def next_occurrence(self) -> Optional["CareTask"]:
-        """
-        If this task is recurring and completed, return a new CareTask
-        for the next occurrence. Returns None if not recurring.
-        """
+        """Return a new CareTask for the next occurrence if this recurring task is completed."""
         if not self.is_completed or self.recurrence is None:
             return None
 
@@ -192,11 +189,7 @@ class Scheduler:
         pet_name: Optional[str] = None,
         completed: Optional[bool] = None,
     ) -> list[CareTask]:
-        """
-        Filter owner tasks by pet name and/or completion status.
-        Pass pet_name='Fido' to get only Fido's tasks.
-        Pass completed=False to get only pending tasks.
-        """
+        """Filter owner tasks by pet name and/or completion status."""
         tasks = self.owner.get_all_tasks()
 
         if pet_name is not None:
@@ -210,11 +203,7 @@ class Scheduler:
     # ── Step 3: Recurring task refresh ─────────────────────────────────────
 
     def refresh_recurring_tasks(self) -> list[CareTask]:
-        """
-        After completing tasks, generate next-occurrence instances for
-        any recurring tasks that were just marked done.
-        Adds new tasks back to the appropriate pet and returns them.
-        """
+        """Generate and add next-occurrence instances for completed recurring tasks."""
         new_tasks: list[CareTask] = []
 
         for pet in self.owner.pets:
@@ -229,11 +218,7 @@ class Scheduler:
     # ── Step 4: Conflict detection ──────────────────────────────────────────
 
     def detect_conflicts(self) -> list[str]:
-        """
-        Detect scheduling conflicts in the daily plan.
-        Uses a running time window: if a new task starts before the previous one
-        ends, it is flagged as a conflict. Returns a list of warning strings.
-        """
+        """Detect overlaps in the daily plan and return a list of warning strings."""
         if not self.daily_plan:
             return []
 

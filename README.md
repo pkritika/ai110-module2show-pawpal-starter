@@ -22,6 +22,14 @@ Your final app should:
 - Display the plan clearly (and ideally explain the reasoning)
 - Include tests for the most important scheduling behaviors
 
+## Smarter Scheduling
+
+Added advanced algorithms to make the assistant more intelligent:
+- **Sorting**: Order tasks by duration (`sort_by_time`).
+- **Filtering**: Isolate tasks by pet or completion status (`filter_tasks`).
+- **Recurring Tasks**: Auto-generate the next due date for daily/weekly chores when marked complete (`next_occurrence`).
+- **Conflict Detection**: Prevent overlapping task schedules with graceful warnings (`detect_conflicts`).
+
 ## Getting started
 
 ### Setup

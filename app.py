@@ -282,6 +282,43 @@ with tab_add:
                 st.success(f"✅ **{task.name}** added!")
                 st.rerun()
 
+    # ── Quick tips row to fill space ────────────────────────────────────────
+    st.markdown("<br>", unsafe_allow_html=True)
+    st.markdown(
+        '<p style="color:#8B8FA8;font-size:.9rem;font-weight:600;letter-spacing:.5px;'
+        'text-transform:uppercase;margin-bottom:.8rem;">💡 Quick Tips</p>',
+        unsafe_allow_html=True,
+    )
+    tip1, tip2, tip3 = st.columns(3)
+    CARD = (
+        'background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);'
+        'border-radius:16px;padding:1.2rem 1.4rem;height:100%;'
+    )
+    tip1.markdown(
+        f'<div style="{CARD}">'
+        '<div style="font-size:1.8rem;margin-bottom:.5rem;">🔴</div>'
+        '<div style="font-weight:700;color:#FAFAFA;font-size:1rem;margin-bottom:.4rem;">Priority Matters</div>'
+        '<div style="color:#8B8FA8;font-size:.9rem;line-height:1.5;">High-priority tasks are always scheduled first, so your most urgent chores never get skipped.</div>'
+        '</div>',
+        unsafe_allow_html=True,
+    )
+    tip2.markdown(
+        f'<div style="{CARD}">'
+        '<div style="font-size:1.8rem;margin-bottom:.5rem;">🔄</div>'
+        '<div style="font-weight:700;color:#FAFAFA;font-size:1rem;margin-bottom:.4rem;">Use Recurrence</div>'
+        '<div style="color:#8B8FA8;font-size:.9rem;line-height:1.5;">Mark a task as daily or weekly and PawPal+ will automatically roll it over when you mark it complete.</div>'
+        '</div>',
+        unsafe_allow_html=True,
+    )
+    tip3.markdown(
+        f'<div style="{CARD}">'
+        '<div style="font-size:1.8rem;margin-bottom:.5rem;">⚡</div>'
+        '<div style="font-weight:700;color:#FAFAFA;font-size:1rem;margin-bottom:.4rem;">Check Conflicts</div>'
+        '<div style="color:#8B8FA8;font-size:.9rem;line-height:1.5;">Head to Smart Schedule to detect overlapping tasks and get an AI-optimised daily plan instantly.</div>'
+        '</div>',
+        unsafe_allow_html=True,
+    )
+
 # ══ TAB 2 · MANAGE ══════════════════════════════════════════════════════════
 with tab_manage:
     all_tasks = owner.get_all_tasks()

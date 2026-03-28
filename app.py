@@ -21,10 +21,36 @@ st.set_page_config(
 st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&display=swap');
-html, body, [class*="css"] { font-family: 'Outfit', sans-serif; }
+
+/* ── Base size-up ─────────────────────────────────────────────── */
+html, body, [class*="css"] {
+    font-family: 'Outfit', sans-serif;
+    font-size: 17px;
+}
+p, li, span, label, div { font-size: 1rem; }
 .block-container  { padding-top: 1.2rem; max-width: 1200px; }
 #MainMenu, footer { visibility: hidden; }
-.stTabs [aria-selected="true"] { color:#FF4B6E !important; border-bottom-color:#FF4B6E !important; font-weight:700; }
+
+/* ── Active tab underline ─────────────────────────────────────── */
+.stTabs [aria-selected="true"] {
+    color: #FF4B6E !important;
+    border-bottom-color: #FF4B6E !important;
+    font-weight: 700;
+    font-size: 1.05rem !important;
+}
+.stTabs [data-baseweb="tab"] { font-size: 1rem !important; font-weight: 500; }
+
+/* ── Sidebar brand glow ───────────────────────────────────────── */
+[data-testid="stSidebar"] { font-size: 1rem; }
+
+/* ── Widget labels ────────────────────────────────────────────── */
+[data-testid="stWidgetLabel"] p { font-size: 0.95rem !important; font-weight: 600; }
+
+/* ── Metric numbers ───────────────────────────────────────────── */
+[data-testid="stMetricValue"] { font-size: 2rem !important; font-weight: 800 !important; }
+
+/* ── inputs & selects ─────────────────────────────────────────── */
+input, select, textarea { font-size: 1rem !important; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -78,14 +104,14 @@ def pill(label, color, bg=None):
     return (
         f'<span style="background:{bg};color:{color};'
         f'padding:3px 10px;border-radius:50px;'
-        f'font-size:.72rem;font-weight:700;margin-right:5px;">'
+        f'font-size:.9rem;font-weight:700;margin-right:5px;">'
         f'{label}</span>'
     )
 
 def chip(label):
     return (
         f'<span style="background:rgba(255,255,255,0.08);color:#BDBDBD;'
-        f'padding:3px 10px;border-radius:50px;font-size:.72rem;margin-right:5px;">'
+        f'padding:4px 12px;border-radius:50px;font-size:.9rem;margin-right:5px;font-weight:600;">'
         f'{label}</span>'
     )
 
@@ -93,8 +119,8 @@ def progress_bar(pct, label=""):
     pct = max(0, min(100, pct))
     return (
         f'<div style="margin:1rem 0 .5rem">'
-        f'<div style="font-size:.85rem;color:#8B8FA8;margin-bottom:.4rem;">{label}</div>'
-        f'<div style="background:rgba(255,255,255,.07);border-radius:99px;height:10px;overflow:hidden;">'
+        f'<div style="font-size:1rem;color:#8B8FA8;margin-bottom:.5rem;font-weight:600;">{label}</div>'
+        f'<div style="background:rgba(255,255,255,.07);border-radius:99px;height:12px;overflow:hidden;">'
         f'<div style="width:{pct}%;height:100%;border-radius:99px;'
         f'background:linear-gradient(90deg,#FF4B6E,#FF8E53);transition:width .6s ease;"></div>'
         f'</div></div>'
@@ -105,8 +131,9 @@ owner = st.session_state.owner
 with st.sidebar:
     # Brand
     st.markdown(
-        '<div style="font-size:1.8rem;font-weight:800;color:#FF4B6E;margin-bottom:.1rem;">PawPal+</div>'
-        '<div style="font-size:.8rem;color:#8B8FA8;margin-bottom:1rem;">Smart Pet Care Scheduling</div>',
+        '<div style="font-size:2.4rem;font-weight:800;color:#FF4B6E;margin-bottom:.1rem;'
+        'text-shadow:0 0 18px rgba(255,75,110,.55);">PawPal+</div>'
+        '<div style="font-size:.95rem;color:#8B8FA8;margin-bottom:1rem;">Smart Pet Care Scheduling</div>',
         unsafe_allow_html=True,
     )
     st.divider()
@@ -117,8 +144,8 @@ with st.sidebar:
     pct_done  = int(done_n / max(1, len(all_tasks)) * 100)
 
     st.markdown(
-        '<div style="font-size:2.5rem;text-align:center;">🐶</div>'
-        f'<div style="text-align:center;font-weight:700;color:#FAFAFA;font-size:.95rem;">Welcome, {owner.name}! (Owner)</div>',
+        '<div style="font-size:3rem;text-align:center;">🐶</div>'
+        f'<div style="text-align:center;font-weight:700;color:#FAFAFA;font-size:1.1rem;">Welcome, {owner.name}! (Owner)</div>',
         unsafe_allow_html=True,
     )
     st.markdown(
@@ -145,9 +172,10 @@ with st.sidebar:
 
 # ── 4. HERO ─────────────────────────────────────────────────────────────────
 st.markdown(
-    '<h1 style="font-size:3.6rem;font-weight:800;color:#FF4B6E;text-align:center;'
-    'letter-spacing:-2px;line-height:1;margin-bottom:.2rem;">PawPal+</h1>'
-    '<p style="text-align:center;color:#8B8FA8;font-size:1rem;margin-bottom:1.5rem;">'
+    '<h1 style="font-size:5.5rem;font-weight:800;color:#FF4B6E;text-align:center;'
+    'letter-spacing:-3px;line-height:1;margin-bottom:.3rem;'
+    'text-shadow:0 0 40px rgba(255,75,110,.6),0 0 80px rgba(255,75,110,.3);">PawPal+</h1>'
+    '<p style="text-align:center;color:#8B8FA8;font-size:1.15rem;margin-bottom:1.5rem;letter-spacing:.5px;">'
     'Seamless Pet Care Scheduling &amp; Management</p>',
     unsafe_allow_html=True,
 )
@@ -223,9 +251,9 @@ with tab_manage:
                 done  = task.is_completed
 
                 title_style = (
-                    "font-size:1.05rem;font-weight:700;color:#9ca3af;text-decoration:line-through;"
+                    "font-size:1.3rem;font-weight:700;color:#9ca3af;text-decoration:line-through;"
                     if done else
-                    "font-size:1.05rem;font-weight:700;color:#FAFAFA;"
+                    "font-size:1.3rem;font-weight:700;color:#FAFAFA;"
                 )
                 card_opacity = "opacity:.55;" if done else ""
                 recur_pill   = pill(f"↺ {task.recurrence}", "#A5B4FC", "rgba(100,100,200,.2)") if task.recurrence else ""
@@ -388,7 +416,7 @@ with tab_sched:
                         f'      border-radius:10px;display:flex;align-items:center;justify-content:center;'
                         f'      font-size:1.5rem;flex-shrink:0;">🗓️</div>'
                         f'  <div style="flex:1;">'
-                        f'    <div style="font-size:1.05rem;font-weight:700;color:#FAFAFA;">{idx+1}. {task.name}</div>'
+                        f'    <div style="font-size:1.3rem;font-weight:700;color:#FAFAFA;">{idx+1}. {task.name}</div>'
                         f'    <div style="margin-top:.4rem;">'
                         f'      {pill(plbl, "#fff", pc)}'
                         f'      {chip(s + " → " + e)}'

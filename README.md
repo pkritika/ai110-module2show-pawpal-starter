@@ -35,7 +35,7 @@ PawPal+ isn't just a basic to-do list; it uses an intelligent scheduling engine 
 
 Get a feel for the sleek, dark-themed interface:
 
-<a href="/course_images/ai110/pawpal_dark_theme.png" target="_blank"><img src='/course_images/ai110/pawpal_dark_theme.png' title='PawPal App' width='' alt='PawPal App' class='center-block' /></a>
+<a href="/course_images/pawpal_dark_theme.png" target="_blank"><img src='/course_images/ai110/pawpal_dark_theme.png' title='PawPal App' width='' alt='PawPal App' class='center-block' /></a>
 
 ## Getting started
 

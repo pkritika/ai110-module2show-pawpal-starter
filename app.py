@@ -49,8 +49,47 @@ p, li, span, label, div { font-size: 1rem; }
 /* ── Metric numbers ───────────────────────────────────────────── */
 [data-testid="stMetricValue"] { font-size: 2rem !important; font-weight: 800 !important; }
 
-/* ── inputs & selects ─────────────────────────────────────────── */
-input, select, textarea { font-size: 1rem !important; }
+/* ── Pill-shaped inputs ────────────────────────────────────────── */
+/* Text inputs */
+div[data-baseweb="input"] {
+    border-radius: 50px !important;
+    overflow: hidden;
+}
+div[data-baseweb="base-input"] {
+    background: rgba(255,255,255,0.06) !important;
+    border: 1.5px solid rgba(255,255,255,0.12) !important;
+    border-radius: 50px !important;
+    padding: 0 1.4rem !important;
+    height: 3.2rem !important;
+    transition: border-color .25s, box-shadow .25s;
+}
+div[data-baseweb="base-input"]:focus-within {
+    border-color: #FF4B6E !important;
+    box-shadow: 0 0 0 3px rgba(255,75,110,.18) !important;
+}
+div[data-baseweb="base-input"] input {
+    font-size: 1.05rem !important;
+    font-weight: 500 !important;
+    color: #FAFAFA !important;
+    background: transparent !important;
+}
+/* Selects / dropdowns */
+div[data-baseweb="select"] > div {
+    background: rgba(255,255,255,0.06) !important;
+    border: 1.5px solid rgba(255,255,255,0.12) !important;
+    border-radius: 50px !important;
+    padding: 0 1.4rem !important;
+    height: 3.2rem !important;
+    transition: border-color .25s, box-shadow .25s;
+}
+div[data-baseweb="select"] > div:focus-within {
+    border-color: #FF4B6E !important;
+    box-shadow: 0 0 0 3px rgba(255,75,110,.18) !important;
+}
+/* Widget labels — bigger & bolder */
+[data-testid="stWidgetLabel"] p { font-size: 0.95rem !important; font-weight: 600 !important; letter-spacing:.3px; }
+/* Date input */
+div[data-baseweb="input"] input[type="text"] { padding:0 !important; }
 </style>
 """, unsafe_allow_html=True)
 

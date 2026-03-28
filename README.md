@@ -35,9 +35,9 @@ PawPal+ isn't just a basic to-do list; it uses an intelligent scheduling engine 
 
 The final premium dark-themed interface — task cards, priority pills, visual timeline, and coral progress bar:
 
-<img src="course_images/1.png" width="500" alt="Add task Page" >
-<img src="course_images/2.png" width="500" alt="Manage task Page" >
-<img src="course_images/3.png" width="500" alt="Smart Schedule Page" >
+<img src="course_images/1.png" width="700" alt="Add task Page">
+<img src="course_images/2.png" width="700" alt="Manage task Page">
+<img src="course_images/3.png" width="700" alt="Smart Schedule Page">
 
 ## Getting started
 

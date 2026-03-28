@@ -48,13 +48,11 @@ This tradeoff is highly reasonable for this scenario because pet care isn't abou
 
 **a. How you used AI**
 
-- How did you use AI tools during this project (for example: design brainstorming, debugging, refactoring)?
-- What kinds of prompts or questions were most helpful?
+During this project, I used AI heavily for both frontend UI design and backend algorithm logic. For the UI, I used AI to generate complex inline CSS to build a premium, glassmorphic dark-themed interface in Streamlit, which isn't natively designed for such rich layouts. For the backend, I used AI to brainstorm the structure of my `Scheduler` class and to help write the `detect_conflicts` logic (checking for overlapping time windows). The most helpful prompts were highly specific visual references (e.g., asking to match a specific UI mockup with "pill-shaped inputs" and "coral glowing text") and clear constraints for the algorithms (e.g., "Sort tasks by priority first, then fit them into a specific time budget").
 
 **b. Judgment and verification**
 
-- Describe one moment where you did not accept an AI suggestion as-is.
-- How did you evaluate or verify what the AI suggested?
+There were instances where the AI generated standard Streamlit UI components (like basic markdown headers and default checkboxes) when I explicitly wanted a highly customized "SaaS" look. Instead of accepting the basic code, I rejected those implementations and specifically prompted the AI to inject custom CSS classes or inline styles to override Streamlit's defaults. To verify the AI's suggestions, I continuously ran the app locally (`python3 -m streamlit run app.py`), visually inspected the rendered layout, and checked how it handled system features like dark/light mode toggling. When light mode made my text invisible, I realized the AI's transparent background approach was flawed, and I had to guide it to force solid dark background colors.
 
 ---
 
@@ -62,13 +60,15 @@ This tradeoff is highly reasonable for this scenario because pet care isn't abou
 
 **a. What you tested**
 
-- What behaviors did you test?
-- Why were these tests important?
+I tested the core scheduling behaviors using a suite of `pytest` unit tests (21 tests in total). Specifically, I tested:
+1. That high-priority tasks always get scheduled before medium or low-priority tasks.
+2. That tasks correctly roll over (recurrence) when marked complete.
+3. That the `detect_conflicts` algorithm accurately catches immediately overlapping or impossible schedules.
+These tests were critical because the entire value proposition of the app is "Smart Pet Care Scheduling"; if the AI greedy algorithm accidentally skipped an urgent medication task for a standard grooming task, the app would be actively harmful to the user.
 
 **b. Confidence**
 
-- How confident are you that your scheduler works correctly?
-- What edge cases would you test next if you had more time?
+I am highly confident that the scheduler works correctly for the current greedy algorithm implementation, as the test coverage is robust. If I had more time, the next edge cases I would test include handling tasks that span across midnight, dealing with precise overlapping timestamps down to the minute, and performance testing the conflict detection with a massive dataset (e.g., hundreds of tasks).
 
 ---
 
@@ -76,12 +76,12 @@ This tradeoff is highly reasonable for this scenario because pet care isn't abou
 
 **a. What went well**
 
-- What part of this project are you most satisfied with?
+I am most satisfied with the radical transformation of the Streamlit frontend. Pushing Streamlit out of its standard, rigid "data dashboard" feel into a sleek, glassmorphic, animated consumer app UI was a major win. The visual timeline feature is particularly satisfying as it clearly visualizes the backend algorithm's output in a very user-friendly way.
 
 **b. What you would improve**
 
-- If you had another iteration, what would you improve or redesign?
+If I had another iteration, I would implement actual database persistence (like SQLite or PostgreSQL) instead of relying solely on `st.session_state`. Right now, refreshing the server wipes user data. I would also build out a proper "Multi-Pet Profile Manager" so users could dynamically add and edit multiple pets rather than replacing the owner profile entirely each time.
 
 **c. Key takeaway**
 
-- What is one important thing you learned about designing systems or working with AI on this project?
+The most important thing I learned working with AI on this project is that AI is incredible at writing complex algorithmic code and CSS very quickly, but it requires extreme specificity to achieve a highly polished final product. You can't just say "make it look good"; you have to act like an Art Director and explicitly ask for the exact padding, border-radius, color codes, and visual hierarchies you want.

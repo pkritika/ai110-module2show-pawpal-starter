@@ -90,6 +90,34 @@ div[data-baseweb="select"] > div:focus-within {
 [data-testid="stWidgetLabel"] p { font-size: 0.95rem !important; font-weight: 600 !important; letter-spacing:.3px; }
 /* Date input */
 div[data-baseweb="input"] input[type="text"] { padding:0 !important; }
+/* ── Primary button: big oval ──────────────────────────────────── */
+.stButton > button[kind="primary"] {
+    border-radius: 50px !important;
+    height: 3.2rem !important;
+    font-size: 1.1rem !important;
+    font-weight: 700 !important;
+    background: #FF4B6E !important;
+    border: none !important;
+    letter-spacing: .5px;
+    transition: transform .2s, box-shadow .2s !important;
+}
+.stButton > button[kind="primary"]:hover {
+    transform: translateY(-3px) !important;
+    box-shadow: 0 8px 28px rgba(255,75,110,.45) !important;
+    background: #e0344e !important;
+}
+/* ── Secondary/default buttons: also rounded ───────────────────── */
+.stButton > button:not([kind="primary"]) {
+    border-radius: 50px !important;
+    font-size: .95rem !important;
+    font-weight: 600 !important;
+    border: 1.5px solid rgba(255,255,255,0.15) !important;
+    transition: border-color .2s, box-shadow .2s !important;
+}
+.stButton > button:not([kind="primary"]):hover {
+    border-color: #FF4B6E !important;
+    box-shadow: 0 0 0 2px rgba(255,75,110,.2) !important;
+}
 </style>
 """, unsafe_allow_html=True)
 

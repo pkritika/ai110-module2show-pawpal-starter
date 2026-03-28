@@ -72,8 +72,8 @@ header[data-testid="stHeader"] {
 }
 /* ── Number input (spinButton) — dark pill ────────────────────── */
 div[data-baseweb="spinButton"] {
-    background: rgba(255,255,255,0.06) !important;
-    border: 1.5px solid rgba(255,255,255,0.12) !important;
+    background: #1A1C24 !important;
+    border: 1.5px solid rgba(255,255,255,0.15) !important;
     border-radius: 50px !important;
     height: 3.2rem !important;
 }
@@ -116,8 +116,8 @@ div[data-baseweb="input"] {
     overflow: hidden;
 }
 div[data-baseweb="base-input"] {
-    background: rgba(255,255,255,0.06) !important;
-    border: 1.5px solid rgba(255,255,255,0.12) !important;
+    background: #1A1C24 !important;
+    border: 1.5px solid rgba(255,255,255,0.15) !important;
     border-radius: 50px !important;
     padding: 0 1.4rem !important;
     height: 3.2rem !important;
@@ -135,8 +135,8 @@ div[data-baseweb="base-input"] input {
 }
 /* Selects / dropdowns */
 div[data-baseweb="select"] > div {
-    background: rgba(255,255,255,0.06) !important;
-    border: 1.5px solid rgba(255,255,255,0.12) !important;
+    background: #1A1C24 !important;
+    border: 1.5px solid rgba(255,255,255,0.15) !important;
     border-radius: 50px !important;
     padding: 0 1.4rem !important;
     height: 3.2rem !important;

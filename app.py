@@ -118,6 +118,26 @@ div[data-baseweb="input"] input[type="text"] { padding:0 !important; }
     border-color: #FF4B6E !important;
     box-shadow: 0 0 0 2px rgba(255,75,110,.2) !important;
 }
+/* ── Premium Add Task container box ───────────────────────────── */
+[data-testid="stVerticalBlockBorderWrapper"] {
+    background: rgba(255,255,255,0.03) !important;
+    border: none !important;
+    border-radius: 24px !important;
+    padding: 2rem !important;
+    position: relative;
+    box-shadow:
+        0 0 0 1.5px rgba(255,75,110,0.25),
+        0 8px 40px rgba(0,0,0,0.35),
+        inset 0 1px 0 rgba(255,255,255,0.06);
+    backdrop-filter: blur(12px);
+    transition: box-shadow .35s;
+}
+[data-testid="stVerticalBlockBorderWrapper"]:hover {
+    box-shadow:
+        0 0 0 1.5px rgba(255,75,110,0.5),
+        0 12px 50px rgba(0,0,0,0.4),
+        inset 0 1px 0 rgba(255,255,255,0.08);
+}
 </style>
 """, unsafe_allow_html=True)
 
@@ -254,7 +274,19 @@ tab_add, tab_manage, tab_sched = st.tabs(["Add Task", "Manage Tasks", "Smart Sch
 
 # ══ TAB 1 · ADD TASK ════════════════════════════════════════════════════════
 with tab_add:
-    st.markdown("### ➕ Create a Care Mission")
+    st.markdown(
+        '<div style="margin-bottom:1.5rem;">'
+        '<div style="display:inline-flex;align-items:center;gap:.7rem;margin-bottom:.5rem;">'
+        '  <span style="font-size:2rem;">🐾</span>'
+        '  <span style="font-size:1.5rem;font-weight:800;color:#FAFAFA;">Create a Care Mission</span>'
+        '</div>'
+        '<div style="height:3px;width:60px;background:linear-gradient(90deg,#FF4B6E,#FF8E53);'
+        'border-radius:99px;"></div>'
+        '<div style="color:#8B8FA8;font-size:.95rem;margin-top:.5rem;">'
+        'Fill in the details below and add it to your pet\'s roster</div>'
+        '</div>',
+        unsafe_allow_html=True,
+    )
     with st.container(border=True):
         c1, c2, c3 = st.columns([3, 1.2, 1.2])
         t_name = c1.text_input("Task name *",   placeholder="e.g. Walk Luna")

@@ -27,7 +27,24 @@ html, body, [class*="css"] {
     font-family: 'Outfit', sans-serif;
     font-size: 17px;
 }
-p, li, span, label, div { font-size: 1rem; }
+/* ── Force dark mode — cannot be overridden by OS light preference ── */
+html, body {
+    background-color: #0E1117 !important;
+    color: #FAFAFA !important;
+}
+[data-testid="stApp"] {
+    background-color: #0E1117 !important;
+}
+[data-testid="stAppViewContainer"] {
+    background-color: #0E1117 !important;
+}
+[data-testid="stSidebar"] {
+    background-color: #1A1C24 !important;
+}
+/* Ensure all plain text gets the light color */
+p, li, span, label, div, h1, h2, h3, h4 {
+    color: inherit;
+}
 .block-container  { padding-top: 1.2rem; max-width: 1200px; }
 #MainMenu, footer { visibility: hidden; }
 

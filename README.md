@@ -22,13 +22,20 @@ Your final app should:
 - Display the plan clearly (and ideally explain the reasoning)
 - Include tests for the most important scheduling behaviors
 
-## Smarter Scheduling
+## ✨ Features
 
-Added advanced algorithms to make the assistant more intelligent:
-- **Sorting**: Order tasks by duration (`sort_by_time`).
-- **Filtering**: Isolate tasks by pet or completion status (`filter_tasks`).
-- **Recurring Tasks**: Auto-generate the next due date for daily/weekly chores when marked complete (`next_occurrence`).
-- **Conflict Detection**: Prevent overlapping task schedules with graceful warnings (`detect_conflicts`).
+PawPal+ isn't just a basic to-do list; it uses an intelligent scheduling engine to calculate the optimal care plan for your pets. 
+
+- **Priority-based Knapsack Scheduling**: The core engine maximizes high-priority tasks while strictly adhering to the owner's available free time constraints.
+- **Sorting by Time & Priority**: The `sort_by_time` algorithm organizes your pending chores logistically, grouping quick wins together or sorting strictly by urgency.
+- **Conflict Warnings**: An O(n²) overlap detection algorithm (`detect_conflicts`) analyzes the generated schedule start-to-finish, gracefully flagging any impossible overlapping time windows with a warning pill.
+- **Daily Recurrence Automation**: The `refresh_recurring_tasks` system listens for completed daily or weekly chores and automatically rolls over a new generated instance for the following period.
+
+## 📸 Demo
+
+Get a feel for the sleek, dark-themed interface:
+
+<a href="/course_images/ai110/pawpal_dark_theme.png" target="_blank"><img src='/course_images/ai110/pawpal_dark_theme.png' title='PawPal App' width='' alt='PawPal App' class='center-block' /></a>
 
 ## Getting started
 

@@ -25,24 +25,6 @@ html, body, [class*="css"] { font-family: 'Outfit', sans-serif; }
 .block-container  { padding-top: 1.2rem; max-width: 1200px; }
 #MainMenu, footer { visibility: hidden; }
 .stTabs [aria-selected="true"] { color:#FF4B6E !important; border-bottom-color:#FF4B6E !important; font-weight:700; }
-/* Nav buttons — fully transparent, no border, left-aligned */
-[data-testid="stSidebar"] .stButton > button {
-    background: transparent !important;
-    border: none !important;
-    box-shadow: none !important;
-    color: #BDBDBD !important;
-    font-weight: 400 !important;
-    font-size: .9rem !important;
-    text-align: left !important;
-    padding: .5rem .8rem !important;
-    border-radius: 10px !important;
-    width: 100% !important;
-    transition: background .2s !important;
-}
-[data-testid="stSidebar"] .stButton > button:hover {
-    background: rgba(255,75,110,0.1) !important;
-    color: #FF4B6E !important;
-}
 </style>
 """, unsafe_allow_html=True)
 
@@ -68,7 +50,7 @@ def _make_sample_owner():
     o.add_pet(luna); o.add_pet(bella)
     return o
 
-for k, v in [("owner", None), ("plan", []), ("warnings", []), ("reasoning", ""), ("seeded", False), ("active_page", "My Tasks")]:
+for k, v in [("owner", None), ("plan", []), ("warnings", []), ("reasoning", ""), ("seeded", False)]:
     if k not in st.session_state:
         st.session_state[k] = v
 
@@ -143,23 +125,6 @@ with st.sidebar:
         progress_bar(pct_done, "Weekly Activity  (" + str(pct_done) + "% Complete)"),
         unsafe_allow_html=True,
     )
-    st.divider()
-
-    # Nav links — real clickable buttons
-    NAV = [("Dashboard","📊"),("Pet Profiles","🐾"),("My Tasks","✅"),("Notifications","🔔"),("Settings","⚙️")]
-    for label, icon in NAV:
-        is_active = st.session_state.active_page == label
-        bg_nav = "rgba(255,75,110,0.18)" if is_active else "transparent"
-        badge  = ' ● Active' if is_active else ''
-        # Render highlighted background via a surrounding markdown div
-        st.markdown(
-            f'<div style="background:{bg_nav};border-radius:10px;margin-bottom:.15rem;">',
-            unsafe_allow_html=True,
-        )
-        if st.button(f"{icon}  {label}{badge}", key=f"nav_{label}"):
-            st.session_state.active_page = label
-            st.rerun()
-        st.markdown('</div>', unsafe_allow_html=True)
 
     st.divider()
     with st.expander("⚙️ Edit Profile"):

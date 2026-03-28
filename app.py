@@ -48,14 +48,57 @@ p, li, span, label, div, h1, h2, h3, h4 {
 .block-container  { padding-top: 1.2rem; max-width: 1200px; }
 #MainMenu, footer { visibility: hidden; }
 
-/* ── Active tab underline ─────────────────────────────────────── */
+/* ── Hide top Streamlit header strip ─────────────────────────── */
+header[data-testid="stHeader"] {
+    background: #0E1117 !important;
+    border-bottom: none !important;
+}
+/* ── Tab labels — always visible ─────────────────────────────── */
+.stTabs [data-baseweb="tab-list"] {
+    background: transparent !important;
+    border-bottom: 1px solid rgba(255,255,255,0.1) !important;
+}
+.stTabs [data-baseweb="tab"] {
+    font-size: 1rem !important;
+    font-weight: 600 !important;
+    color: #8B8FA8 !important;
+    background: transparent !important;
+    padding: .7rem 1.2rem !important;
+}
 .stTabs [aria-selected="true"] {
     color: #FF4B6E !important;
-    border-bottom-color: #FF4B6E !important;
-    font-weight: 700;
+    border-bottom: 2px solid #FF4B6E !important;
+    font-weight: 700 !important;
+}
+/* ── Number input (spinButton) — dark pill ────────────────────── */
+div[data-baseweb="spinButton"] {
+    background: rgba(255,255,255,0.06) !important;
+    border: 1.5px solid rgba(255,255,255,0.12) !important;
+    border-radius: 50px !important;
+    height: 3.2rem !important;
+}
+div[data-baseweb="spinButton"] input {
+    background: transparent !important;
+    color: #FAFAFA !important;
+    font-size: 1.05rem !important;
+    font-weight: 500 !important;
+}
+div[data-baseweb="spinButton"] button {
+    background: transparent !important;
+    color: #BDBDBD !important;
+}
+/* ── Date input — dark pill ───────────────────────────────────── */
+div[data-baseweb="input"] input,
+div[data-baseweb="input"] input[type="text"] {
+    background: transparent !important;
+    color: #FAFAFA !important;
     font-size: 1.05rem !important;
 }
-.stTabs [data-baseweb="tab"] { font-size: 1rem !important; font-weight: 500; }
+/* ── Select option text visible ───────────────────────────────── */
+div[data-baseweb="select"] span,
+div[data-baseweb="select"] div[class*="placeholder"] {
+    color: #FAFAFA !important;
+}
 
 /* ── Sidebar brand glow ───────────────────────────────────────── */
 [data-testid="stSidebar"] { font-size: 1rem; }

@@ -87,3 +87,21 @@ If I had another iteration, I would implement actual database persistence (like 
 **c. Key takeaway**
 
 The most important thing I learned working with AI on this project is that AI is incredible at writing complex algorithmic code and CSS very quickly, but it requires extreme specificity to achieve a highly polished final product. You can't just say "make it look good"; you have to act like an Art Director and explicitly ask for the exact padding, border-radius, color codes, and visual hierarchies you want.
+
+---
+
+## 6. Optional Extensions
+
+I successfully completed the following optional challenges to elevate the application from a basic prototype to a premium SaaS product:
+
+### Challenge 2: Data Persistence
+I implemented a JSON-based data persistence layer natively within the `pawpal_system.py` backend using Python's standard `json` library. I added `to_dict()` and `from_dict()` serialization methods to the `CareTask`, `Pet`, and `Owner` classes. The `Owner` class now features `save_to_json()` and `load_from_json()` methods. The Streamlit frontend (`app.py`) was updated to automatically load this data on startup and trigger a `save_data()` helper after any state mutation (adding tasks, marking complete, deleting). 
+
+### Challenge 3: Advanced Priority Scheduling 
+I implemented a priority-based Greedy Scheduling algorithm in `Scheduler.generate_plan()`. The algorithm ranks tasks mathematically by assigning urgency levels (High=1, Medium=2, Low=3). The logic forces the engine to sort tasks by `priority` first and `duration` second, guaranteeing that critical tasks (like Vet Appointments or Medications) never get pushed out by longer, low-priority tasks (like Grooming) when time is tight. 
+
+### Challenge 4: Professional UI and Output Formatting
+I completely overhauled the default Streamlit UI using extensive inline CSS injection, transforming it into a dark-mode "Glassmorphic" interface. 
+- **Priority Indicators:** Tasks are visually color-coded with custom HTML pill badges (🔴 HIGH, 🟡 MED, 🟢 NORMAL).
+- **Cards & Visuals:** I used emoji-based iconography, border-radius cards with dynamic hover shadows, and custom fonts.
+- **Visual Timeline:** Instead of a simple CLI table or basic text dump, the generated schedule is rendered as a beautiful vertical timeline with time-stamp dots, explicitly separating the planning logic from an engaging user experience.

@@ -202,6 +202,8 @@ div[data-baseweb="input"] input[type="text"] { padding:0 !important; }
 """, unsafe_allow_html=True)
 
 # ── 2. Session state + sample data seed ────────────────────────────────────
+DATA_FILE = "data.json"   # persisted between runs
+
 def _make_sample_owner():
     luna  = Pet("Luna",  "Labrador")
     bella = Pet("Bella", "Poodle")
@@ -223,13 +225,22 @@ def _make_sample_owner():
     o.add_pet(luna); o.add_pet(bella)
     return o
 
+def save_data():
+    """Persist the current owner profile to data.json."""
+    if st.session_state.get("owner"):
+        st.session_state.owner.save_to_json(DATA_FILE)
+
 for k, v in [("owner", None), ("plan", []), ("warnings", []), ("reasoning", ""), ("seeded", False)]:
     if k not in st.session_state:
         st.session_state[k] = v
 
-# Auto-seed sample data on first load
+# On first load: try restoring from data.json, else seed sample data
 if not st.session_state.seeded:
-    st.session_state.owner  = _make_sample_owner()
+    loaded = Owner.load_from_json(DATA_FILE)
+    if loaded:
+        st.session_state.owner = loaded
+    else:
+        st.session_state.owner = _make_sample_owner()
     st.session_state.seeded = True
 
 PMAP   = {"High": 1, "Medium": 2, "Low": 3}
@@ -315,6 +326,7 @@ with st.sidebar:
                 st.session_state.plan     = []
                 st.session_state.warnings = []
                 st.session_state.reasoning = ""
+                save_data()
                 st.rerun()
 
 # ── 4. HERO ─────────────────────────────────────────────────────────────────
@@ -372,6 +384,7 @@ with tab_add:
                     if p.name == t_pet:
                         p.add_task(task); break
                 st.success(f"✅ **{task.name}** added!")
+                save_data()
                 st.rerun()
 
     # ── Quick tips row to fill space ────────────────────────────────────────
@@ -473,11 +486,11 @@ with tab_manage:
                 )
                 b1, b2 = st.columns(2)
                 if b1.button("✓ Done" if not done else "↩ Undo", key=f"d{i}", use_container_width=True):
-                    task.mark_complete(); st.rerun()
+                    task.mark_complete(); save_data(); st.rerun()
                 if b2.button("🗑 Delete", key=f"x{i}", use_container_width=True):
                     for p in owner.pets:
                         if task in p.tasks: p.tasks.remove(task); break
-                    st.rerun()
+                    save_data(); st.rerun()
 
     # ── Right: visual timeline ───────────────────────────────────────────────
     with right_col:

@@ -377,3 +377,60 @@ def test_filter_tasks_by_completion_status():
         "filter_tasks(completed=True) must only return completed tasks."
     )
     assert len(completed) == 1
+
+
+# ===========================================================================
+# 7 · JSON Persistence (Challenge 2)
+# ===========================================================================
+
+def test_caretask_to_dict_roundtrip():
+    """Serializing and deserializing a CareTask should preserve all fields."""
+    original = CareTask(
+        name="Vet Visit", pet_name="Luna", duration=45, priority=1,
+        is_completed=True, recurrence="weekly", due_date=date(2026, 4, 1),
+    )
+    restored = CareTask.from_dict(original.to_dict())
+
+    assert restored.name         == original.name
+    assert restored.pet_name     == original.pet_name
+    assert restored.duration     == original.duration
+    assert restored.priority     == original.priority
+    assert restored.is_completed == original.is_completed
+    assert restored.recurrence   == original.recurrence
+    assert restored.due_date     == original.due_date
+
+
+def test_owner_save_and_load_json(tmp_path):
+    """Saving and reloading an Owner via JSON should fully restore pets and tasks."""
+    import json as _json
+
+    owner = Owner("Sarah", 180)
+    luna  = Pet("Luna", "Labrador")
+    luna.add_task(CareTask("Walk", "Luna", 30, 1, False, "daily", date(2026, 4, 1)))
+    owner.add_pet(luna)
+
+    filepath = str(tmp_path / "test_data.json")
+    owner.save_to_json(filepath)
+
+    # File should exist and be valid JSON
+    assert os.path.exists(filepath)
+    with open(filepath) as f:
+        raw = _json.load(f)
+    assert raw["name"] == "Sarah"
+
+    # Reload and verify
+    loaded = Owner.load_from_json(filepath)
+    assert loaded.name             == "Sarah"
+    assert loaded.available_time   == 180
+    assert len(loaded.pets)        == 1
+    assert loaded.pets[0].name     == "Luna"
+    assert len(loaded.pets[0].tasks) == 1
+    assert loaded.pets[0].tasks[0].name == "Walk"
+    assert loaded.pets[0].tasks[0].due_date == date(2026, 4, 1)
+
+
+def test_load_from_json_returns_none_when_missing():
+    """load_from_json should return None (not raise) when the file doesn't exist."""
+    result = Owner.load_from_json("/tmp/nonexistent_pawpal_data_xyz.json")
+    assert result is None, "Should return None for a missing file."
+

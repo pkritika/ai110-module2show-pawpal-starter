@@ -5,6 +5,8 @@ All backend classes for the pet care scheduling system.
 Classes: CareTask, Pet, Owner, Scheduler
 """
 
+import json
+import os
 from dataclasses import dataclass, field
 from typing import Optional
 from datetime import date, timedelta
@@ -56,6 +58,32 @@ class CareTask:
             due_date=next_due,
         )
 
+    def to_dict(self) -> dict:
+        """Serialize this task to a JSON-friendly dictionary."""
+        return {
+            "name": self.name,
+            "pet_name": self.pet_name,
+            "duration": self.duration,
+            "priority": self.priority,
+            "is_completed": self.is_completed,
+            "recurrence": self.recurrence,
+            "due_date": self.due_date.isoformat() if self.due_date else None,
+        }
+
+    @classmethod
+    def from_dict(cls, d: dict) -> "CareTask":
+        """Deserialize a CareTask from a dictionary (e.g. loaded from JSON)."""
+        due_raw = d.get("due_date")
+        return cls(
+            name=d["name"],
+            pet_name=d["pet_name"],
+            duration=d["duration"],
+            priority=d["priority"],
+            is_completed=d.get("is_completed", False),
+            recurrence=d.get("recurrence"),
+            due_date=date.fromisoformat(due_raw) if due_raw else None,
+        )
+
     def __str__(self) -> str:
         status = "✓" if self.is_completed else "○"
         priority_label = {1: "High", 2: "Medium", 3: "Low"}.get(self.priority, "?")
@@ -85,6 +113,21 @@ class Pet:
     def get_all_tasks(self) -> list[CareTask]:
         """Return all care tasks for this pet."""
         return list(self.tasks)
+
+    def to_dict(self) -> dict:
+        """Serialize this pet to a JSON-friendly dictionary."""
+        return {
+            "name": self.name,
+            "species_breed": self.species_breed,
+            "tasks": [t.to_dict() for t in self.tasks],
+        }
+
+    @classmethod
+    def from_dict(cls, d: dict) -> "Pet":
+        """Deserialize a Pet from a dictionary."""
+        pet = cls(name=d["name"], species_breed=d.get("species_breed"))
+        pet.tasks = [CareTask.from_dict(t) for t in d.get("tasks", [])]
+        return pet
 
     def __str__(self) -> str:
         breed_info = f" ({self.species_breed})" if self.species_breed else ""
@@ -117,6 +160,35 @@ class Owner:
         for pet in self.pets:
             all_tasks.extend(pet.get_all_tasks())
         return all_tasks
+
+    def to_dict(self) -> dict:
+        """Serialize this owner (and all pets/tasks) to a JSON-friendly dictionary."""
+        return {
+            "name": self.name,
+            "available_time": self.available_time,
+            "pets": [p.to_dict() for p in self.pets],
+        }
+
+    @classmethod
+    def from_dict(cls, d: dict) -> "Owner":
+        """Deserialize an Owner from a dictionary."""
+        owner = cls(name=d["name"], available_time=d["available_time"])
+        owner.pets = [Pet.from_dict(p) for p in d.get("pets", [])]
+        return owner
+
+    def save_to_json(self, filepath: str = "data.json") -> None:
+        """Persist the owner's full profile (pets + tasks) to a JSON file."""
+        with open(filepath, "w", encoding="utf-8") as f:
+            json.dump(self.to_dict(), f, indent=2)
+
+    @classmethod
+    def load_from_json(cls, filepath: str = "data.json") -> Optional["Owner"]:
+        """Load an Owner from a JSON file. Returns None if the file doesn't exist."""
+        if not os.path.exists(filepath):
+            return None
+        with open(filepath, "r", encoding="utf-8") as f:
+            data = json.load(f)
+        return cls.from_dict(data)
 
     def __str__(self) -> str:
         return f"Owner: {self.name} | Available: {self.available_time} min | Pets: {len(self.pets)}"

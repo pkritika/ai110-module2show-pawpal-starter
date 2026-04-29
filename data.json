@@ -1,0 +1,39 @@
+{
+  "name": "Sarah",
+  "available_time": 180,
+  "pets": [
+    {
+      "name": "Luna",
+      "species_breed": "Labrador",
+      "tasks": [
+        {
+          "name": "Walk Luna",
+          "pet_name": "Luna",
+          "duration": 30,
+          "priority": 1,
+          "is_completed": false,
+          "recurrence": null,
+          "due_date": "2026-04-29"
+        },
+        {
+          "name": "Food",
+          "pet_name": "Luna",
+          "duration": 15,
+          "priority": 1,
+          "is_completed": false,
+          "recurrence": "daily",
+          "due_date": "2026-04-29"
+        },
+        {
+          "name": "Play time",
+          "pet_name": "Luna",
+          "duration": 20,
+          "priority": 2,
+          "is_completed": false,
+          "recurrence": "daily",
+          "due_date": "2026-04-29"
+        }
+      ]
+    }
+  ]
+}

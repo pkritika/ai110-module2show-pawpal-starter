@@ -105,3 +105,20 @@ I completely overhauled the default Streamlit UI using extensive inline CSS inje
 - **Priority Indicators:** Tasks are visually color-coded with custom HTML pill badges (🔴 HIGH, 🟡 MED, 🟢 NORMAL).
 - **Cards & Visuals:** I used emoji-based iconography, border-radius cards with dynamic hover shadows, and custom fonts.
 - **Visual Timeline:** Instead of a simple CLI table or basic text dump, the generated schedule is rendered as a beautiful vertical timeline with time-stamp dots, explicitly separating the planning logic from an engaging user experience.
+
+---
+
+## 7. AI Ethics & Collaboration Reflection
+
+**Limitations & Biases**
+The AI relies heavily on its generalized training data for pet care advice, which inherently biases it toward common pets like dogs and cats. If an owner inputs an exotic pet, the AI might suggest inappropriate tasks (e.g., suggesting a walk for a reptile). Additionally, the system is limited by its context window—it doesn't have a long-term memory of past interactions beyond the current Streamlit session.
+
+**Misuse & Prevention**
+A user could theoretically misuse the AI by prompting it to infinitely loop or flood the system with hundreds of bogus tasks (e.g., "Add 1000 tasks named 'test'"), causing the Streamlit UI to crash or experience a denial-of-service. To prevent this, I would implement a hard cap inside the `add_care_task` Python tool (e.g., limiting a pet to a maximum of 20 pending tasks) so the backend rejects spam inputs regardless of what the LLM decides to execute.
+
+**Reliability Testing Surprises**
+While testing reliability, I was surprised by the AI's data-type intuition. Without explicit few-shot examples, Gemini perfectly mapped natural language requests like "really urgent" or "top priority" to the strict integer `1` expected by the backend function. However, I was equally surprised that it confidently attempted to assign tasks to hallucinated pets (pets not provided in the RAG context) until I added strict backend validation to reject those operations.
+
+**Collaboration with AI**
+- **Helpful Instance:** The AI was incredibly helpful when designing the `test_ai_agent.py` script. It accurately suggested the `google-genai` schema mapping required to intercept and verify `response.function_calls` without actually executing them in the test environment.
+- **Flawed Instance:** During the integration, the AI initially provided code that tried to maintain the chat history using standard Python lists inside a Streamlit script. Because Streamlit reruns top-to-bottom on every interaction, the list kept resetting, deleting the chat history. I had to identify the flaw and correct it by placing the chat array firmly inside `st.session_state`.

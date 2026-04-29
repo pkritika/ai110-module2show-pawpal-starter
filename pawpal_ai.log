@@ -1,0 +1,13 @@
+2026-04-29 18:52:55,493 - INFO - HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 404 Not Found"
+2026-04-29 18:56:36,097 - INFO - HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 404 Not Found"
+2026-04-29 19:08:11,655 - INFO - HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 404 Not Found"
+2026-04-29 19:10:54,247 - INFO - HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 404 Not Found"
+2026-04-29 19:13:08,017 - INFO - HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+2026-04-29 19:13:08,055 - INFO - AI Tool Success: Added task 'Food' (Duration: 15m, Priority: 1) for pet 'Luna'.
+2026-04-29 19:13:09,268 - INFO - HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+2026-04-29 19:19:52,597 - INFO - HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+2026-04-29 19:19:52,656 - INFO - AI Tool Success: Added task 'Food' (Duration: 15m, Priority: 1) for pet 'Luna'.
+2026-04-29 19:19:54,280 - INFO - HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+2026-04-29 19:20:26,235 - INFO - HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+2026-04-29 19:20:26,294 - INFO - AI Tool Success: Added task 'Play time' (Duration: 20m, Priority: 2) for pet 'Luna'.
+2026-04-29 19:20:27,819 - INFO - HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"

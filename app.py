@@ -7,7 +7,17 @@ Pre-populated sample data renders immediately on first load.
 import streamlit as st
 from datetime import date, timedelta
 import pandas as pd
+import logging
 from pawpal_system import CareTask, Pet, Owner, Scheduler
+import pawpal_ai
+
+
+# Set up logging for AI reliability tracking
+logging.basicConfig(
+    filename='pawpal_ai.log',
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s'
+)
 
 # ── 1. Page config ──────────────────────────────────────────────────────────
 st.set_page_config(
@@ -230,7 +240,7 @@ def save_data():
     if st.session_state.get("owner"):
         st.session_state.owner.save_to_json(DATA_FILE)
 
-for k, v in [("owner", None), ("plan", []), ("warnings", []), ("reasoning", ""), ("seeded", False)]:
+for k, v in [("owner", None), ("plan", []), ("warnings", []), ("reasoning", ""), ("seeded", False), ("ai_messages", [])]:
     if k not in st.session_state:
         st.session_state[k] = v
 
@@ -342,7 +352,7 @@ st.markdown(
 owner = st.session_state.owner
 
 # ── 5. TABS ─────────────────────────────────────────────────────────────────
-tab_add, tab_manage, tab_sched = st.tabs(["Add Task", "Manage Tasks", "Smart Schedule"])
+tab_add, tab_manage, tab_sched, tab_ai = st.tabs(["Add Task", "Manage Tasks", "Smart Schedule", "🤖 AI Assistant"])
 
 # ══ TAB 1 · ADD TASK ════════════════════════════════════════════════════════
 with tab_add:
@@ -656,3 +666,154 @@ with tab_sched:
 
             elif reasoning:
                 st.warning("No tasks fit your time budget.")
+
+# ══ TAB 4 · AI ASSISTANT ════════════════════════════════════════════════════
+with tab_ai:
+    st.markdown("### 🤖 PawPal+ AI Advisor")
+    st.caption("Ask questions about pet care, or tell the AI to create tasks for you!")
+    
+    client = pawpal_ai.get_ai_client()
+    if not client:
+        st.error("⚠️ ANTHROPIC_API_KEY environment variable is missing. Please set it to use the AI Assistant.")
+    else:
+        # Define the tool schema for Anthropic
+        add_care_task_tool = {
+            "name": "add_care_task",
+            "description": "Adds a new care task for a specific pet.",
+            "input_schema": {
+                "type": "object",
+                "properties": {
+                    "pet_name": {"type": "string", "description": "The name of the pet (must match an existing pet)."},
+                    "task_name": {"type": "string", "description": "A short name for the task (e.g. 'Walk', 'Brush')."},
+                    "duration": {"type": "integer", "description": "Estimated time in minutes."},
+                    "priority": {"type": "integer", "description": "Priority level (1=High, 2=Medium, 3=Low)."},
+                    "recurrence": {"type": "string", "enum": ["daily", "weekly", "Never"], "description": "How often it repeats."}
+                },
+                "required": ["pet_name", "task_name", "duration", "priority"]
+            }
+        }
+
+        # Local execution function
+        def add_care_task(pet_name: str, task_name: str, duration: int, priority: int, recurrence: str = "Never") -> str:
+            if recurrence not in ["daily", "weekly", "Never"]:
+                recurrence = "Never"
+            
+            new_task = CareTask(
+                name=task_name,
+                pet_name=pet_name,
+                duration=duration,
+                priority=priority,
+                recurrence=None if recurrence == "Never" else recurrence,
+                due_date=date.today()
+            )
+            
+            pet_found = False
+            for p in st.session_state.owner.pets:
+                if p.name.lower() == pet_name.lower():
+                    p.add_task(new_task)
+                    pet_found = True
+                    break
+            
+            if pet_found:
+                save_data()
+                logging.info(f"AI Tool Success: Added task '{task_name}' (Duration: {duration}m, Priority: {priority}) for pet '{pet_name}'.")
+                return f"Successfully added '{task_name}' for {pet_name}."
+            else:
+                logging.warning(f"AI Tool Failed: Attempted to add task for non-existent pet '{pet_name}'.")
+                return f"Failed: Could not find a pet named '{pet_name}'. Please ask the user to create this pet first."
+
+        # Setup Chat session if not exists
+        if "ai_messages" not in st.session_state:
+            st.session_state.ai_messages = []
+            
+        sys_inst = pawpal_ai.get_system_instruction(st.session_state.owner)
+
+        # 1. RAG Visibility 
+        with st.expander("📚 View Retrieved RAG Context", expanded=False):
+            st.info("This live data is dynamically injected into Claude's prompt before every message:")
+            st.code(sys_inst, language="text")
+
+        # Display history
+        for msg in st.session_state.ai_messages:
+            if msg["role"] == "user":
+                # Ensure we only print text, not tool results
+                if isinstance(msg["content"], str):
+                    with st.chat_message("user"):
+                        st.markdown(msg["content"])
+            elif msg["role"] == "assistant":
+                # Assistant content is a list of blocks
+                for block in msg["content"]:
+                    if block.type == "text":
+                        with st.chat_message("assistant"):
+                            st.markdown(block.text)
+                
+        # Handle input
+        if prompt := st.chat_input("E.g. Add a 15 min daily brush task for Luna"):
+            st.session_state.ai_messages.append({"role": "user", "content": prompt})
+            with st.chat_message("user"):
+                st.markdown(prompt)
+                
+            with st.chat_message("assistant"):
+                with st.spinner("Thinking..."):
+                    # Send message
+                    response = client.messages.create(
+                        model="claude-haiku-4-5",
+                        max_tokens=1024,
+                        system=sys_inst,
+                        messages=st.session_state.ai_messages,
+                        tools=[add_care_task_tool]
+                    )
+                    
+                    st.session_state.ai_messages.append(
+                        {"role": "assistant", "content": response.content}
+                    )
+                    
+                    for block in response.content:
+                        if block.type == "text":
+                            st.markdown(block.text)
+                            
+                    # Handle function calls
+                    if response.stop_reason == "tool_use":
+                        for block in response.content:
+                            if block.type == "tool_use" and block.name == "add_care_task":
+                                # 2. Agentic Workflow Visibility
+                                with st.status("🔄 Agentic Workflow: Executing Tool", expanded=True) as status:
+                                    st.write("✔️ **Step 1 (Plan):** Claude determined it needs to use the `add_care_task` tool.")
+                                    args = block.input
+                                    st.write(f"✔️ **Step 2 (Act):** Passing arguments to Python: `{args}`")
+                                    
+                                    res = add_care_task(**args)
+                                    st.write(f"✔️ **Step 3 (Verify):** Python execution complete. Result: `{res}`")
+                                    
+                                    st.session_state.ai_messages.append({
+                                        "role": "user",
+                                        "content": [
+                                            {
+                                                "type": "tool_result",
+                                                "tool_use_id": block.id,
+                                                "content": res
+                                            }
+                                        ]
+                                    })
+                                    
+                                    st.write("✔️ **Step 4 (Finalize):** Sending result back to Claude...")
+                                    
+                                    # Follow-up call
+                                    final_resp = client.messages.create(
+                                        model="claude-haiku-4-5",
+                                        max_tokens=1024,
+                                        system=sys_inst,
+                                        messages=st.session_state.ai_messages,
+                                        tools=[add_care_task_tool]
+                                    )
+                                    st.session_state.ai_messages.append(
+                                        {"role": "assistant", "content": final_resp.content}
+                                    )
+                                    status.update(label="✅ Agentic Workflow Complete", state="complete", expanded=False)
+                                    
+                                for tb in final_resp.content:
+                                    if tb.type == "text":
+                                        st.markdown(tb.text)
+                                        
+                        st.rerun()
+

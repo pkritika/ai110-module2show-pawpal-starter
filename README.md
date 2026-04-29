@@ -101,6 +101,13 @@ The system relies on a seamless loop between the user, the AI, and the underlyin
 * **User Input**: *"Yes, please add a 20 minute high priority walk for Luna, and make it repeat daily."*
 * **AI Output**: *(AI executes the `add_care_task` tool internally)* *"All set! I've successfully added a 2-minute daily walk for Luna at High priority. It is now visible on your Manage Tasks timeline!"*
 
+**Demo Video**
+<div>
+    <a href="https://www.loom.com/share/1b7f2165b7d1409e929f4f9df85cfc7c">
+      <img style="max-width:300px;" src="https://cdn.loom.com/sessions/thumbnails/1b7f2165b7d1409e929f4f9df85cfc7c-6d6328b3d4abe0bb-full-play.gif#t=0.1">
+    </a>
+  </div>
+
 ## Design Decisions
 - **Agentic Workflow over Pure RAG**: I chose to give the AI function-calling capabilities (`add_care_task` tool) rather than just making it a chatbot. This trade-off required more complex backend wiring but turned the AI from a passive encyclopedia into an active assistant that saves the user time.
 - **Dynamic System Prompts**: Instead of a complex vector database for RAG, I injected the user's current pets, schedule, and time limits directly into the system prompt on every interaction. Since the context window easily handles this, it provides real-time accuracy without the overhead of external databases.

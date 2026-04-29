@@ -58,7 +58,9 @@ To prove the AI actually works and isn't just a basic prompt-wrapper, the system
 3. **Human Evaluation**: The user operates as a "human-in-the-loop," verifying all AI-generated tasks in the Smart Schedule tab before accepting them as final.
 
 **Testing Summary:**
-All automated tests passed; however, the AI initially struggled when user context was completely missing or pets were undefined. Logging revealed a 95% tool-calling accuracy which improved to near 100% after adding strict validation rules to the Python tool itself.
+- **What worked**: All automated unit tests passed successfully. The AI seamlessly mapped natural language urgency (e.g. "top priority") to the exact integer schema without needing few-shot examples.
+- **What didn't**: Initially, the AI struggled when pets were undefined, and it would confidently try to schedule tasks for "hallucinated" pets that the user didn't own. 
+- **What I learned**: I learned the immense value of backend guardrails. By adding strict validation rules to the Python tool itself to reject non-existent pets, the tool-calling accuracy improved to near 100%, and the AI learned to ask for clarification instead of failing silently.
 
 ## Reflection
 This project profoundly shifted my perspective on AI from "text generators" to "system operators." Bridging the gap between the unpredictability of natural language and the strict requirements of a Python data class was the most exciting challenge. It taught me that the true power of an Agentic Workflow lies not just in the LLM's intelligence, but in the specific, well-defined tools and boundaries you build around it. Problem-solving in this era is less about writing perfect logic from scratch, and more about orchestrating AI to do the heavy lifting safely and reliably.

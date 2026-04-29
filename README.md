@@ -9,6 +9,61 @@
 The **PawPal+ AI Advisor** supercharges the original pet care application by introducing a fully integrated **Agentic AI Workflow**. Instead of manually filling out forms to create schedules, users can converse naturally with an intelligent assistant powered by Anthropic's Claude. The AI not only answers pet care questions but actively manages your schedule—autonomously creating, categorizing, and assigning tasks based on your instructions. This dramatically reduces friction, making pet care management as simple as texting a knowledgeable friend.
 
 ## Architecture Overview
+
+```mermaid
+flowchart TD
+    %% Define User / Input
+    User((Human User))
+    
+    %% Input Stage
+    subgraph Input Phase
+        UI[Streamlit Chat UI]
+        Context[Owner Context]
+    end
+    
+    %% Process Stage (The Agentic AI)
+    subgraph Agentic Workflow Process
+        Agent[Claude 3.5 Haiku Agent]
+        RAG[RAG / Context Builder]
+        Tools[[add_care_task Tool]]
+    end
+    
+    %% Output Stage
+    subgraph Output Phase
+        DB[(Local JSON Data)]
+        Display[Updated UI & Tasks]
+    end
+
+    %% Data Flow
+    User -- "Types request (e.g., 'Add a walk for Luna')" --> UI
+    UI -- "User Prompt" --> Agent
+    
+    %% Context Retrieval (RAG)
+    Context -- "Current Pets, Tasks, Time" --> RAG
+    RAG -- "System Prompt Context" --> Agent
+    
+    %% Agent Processing & Tool Calling
+    Agent -- "1. Decides to call tool" --> Tools
+    Tools -- "2. Executes python function" --> DB
+    Tools -- "3. Returns success/fail" --> Agent
+    
+    %% Output Generation
+    Agent -- "Generates response" --> Display
+    DB -- "Reloads state" --> Display
+    
+    %% Human Verification Step
+    Display -- "Shows generated tasks & response" --> User
+    User -. "Human-in-the-loop: Verifies and Manages Tasks" .-> Context
+    
+    classDef ai fill:#3b82f6,stroke:#2563eb,stroke-width:2px,color:#fff;
+    classDef db fill:#10b981,stroke:#059669,stroke-width:2px,color:#fff;
+    classDef human fill:#f59e0b,stroke:#d97706,stroke-width:2px,color:#fff;
+    
+    class Agent,RAG,Tools ai;
+    class DB,Context db;
+    class User human;
+```
+
 The system relies on a seamless loop between the user, the AI, and the underlying data model:
 1. **Input Phase**: The human user interacts via the Streamlit Chat UI. Simultaneously, the system gathers the user's `Owner Context` (current pets, schedule, and time limits).
 2. **Agentic Process**: A **RAG (Retrieval-Augmented Generation) Builder** dynamically feeds this context into the **Claude 3.5 Haiku Agent**. 
